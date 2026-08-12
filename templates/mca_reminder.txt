@@ -1,0 +1,18 @@
+Halo, *{{merchant_name}}* 💰
+
+Ada kabar baik untuk Anda!
+
+Outlet Anda telah *memenuhi syarat* untuk mendapatkan fasilitas *Grab Modal (MCA)* dengan limit hingga:
+
+💵 *{{mca_limit}}*
+
+Grab Modal bisa membantu Anda:
+✅ Menambah stok bahan baku
+✅ Renovasi atau upgrade dapur
+✅ Ekspansi menu & operasional
+
+Proses pengajuan mudah dan cepat langsung dari *Grab Merchant App*!
+
+Hubungi AM Anda *{{am_name}}* atau buka Grab Merchant App → Grab Modal untuk mulai pengajuan sekarang 📲
+
+_AM Hub · GrabFood Indonesia_

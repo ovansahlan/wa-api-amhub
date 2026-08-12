@@ -1,0 +1,20 @@
+🎯 *Undangan Campaign GMS — GrabFood!*
+
+Halo *{{merchant_name}}* 👋
+
+Kami dengan senang hati mengundang outlet Anda untuk bergabung ke campaign:
+
+📢 *{{campaign_name}}*
+
+{{campaign_details}}
+
+Dengan bergabung ke campaign ini, Anda berpeluang untuk:
+🚀 Meningkatkan visibilitas di aplikasi Grab
+📈 Mendapatkan lebih banyak order
+💰 Meraih insentif merchant tambahan
+
+Untuk informasi lebih lanjut dan pendaftaran, silakan hubungi Account Manager Anda: *{{am_name}}*
+
+Jangan lewatkan kesempatan ini! 🔥
+
+_AM Hub · GrabFood Indonesia_

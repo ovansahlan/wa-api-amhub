@@ -1,0 +1,18 @@
+# WhatsApp session (JANGAN di-commit ke git!)
+auth_info_baileys/
+
+# Environment variables
+.env
+
+# Database
+data/
+
+# Logs
+logs/*.log
+
+# Node modules
+node_modules/
+
+# OS files
+.DS_Store
+Thumbs.db

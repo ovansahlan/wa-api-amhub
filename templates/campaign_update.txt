@@ -1,0 +1,14 @@
+📣 *Update Campaign GMS — GrabFood!*
+
+Halo *{{merchant_name}}* 👋
+
+Ada update penting mengenai campaign GMS outlet Anda:
+
+📋 *Detail Update:*
+{{update_details}}
+
+Untuk pertanyaan lebih lanjut, silakan hubungi Account Manager Anda: *{{am_name}}*
+
+Terima kasih atas kepercayaan Anda! 🙏
+
+_AM Hub · GrabFood Indonesia_

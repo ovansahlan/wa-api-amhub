@@ -1,0 +1,14 @@
+Halo, *{{merchant_name}}* 👋
+
+Kami ingin menginformasikan bahwa Account Manager GrabFood kami, *{{am_name}}*, berencana untuk berkunjung ke outlet Anda:
+
+📅 *Tanggal:* {{visit_date}}
+🕐 *Waktu:* {{visit_time}}
+
+Kunjungan ini bertujuan untuk membantu mengoptimalkan performa outlet Anda di GrabFood — mulai dari campaign, performa penjualan, hingga peluang Grab Modal 🚀
+
+Mohon konfirmasi ketersediaan Anda. Jika ada perubahan jadwal, jangan ragu untuk menghubungi kami kembali.
+
+Terima kasih banyak! 🙏
+
+_AM Hub · GrabFood Indonesia_
