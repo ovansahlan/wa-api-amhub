@@ -113,9 +113,27 @@ const formatPhone = (phone) => {
  * Kirim pesan via session tertentu
  */
 const sendMessage = async (phone, message, sessionId = 'bot') => {
-  const sess = sessions.get(sessionId);
+  let sess = sessions.get(sessionId);
+
+  // Jika sesi putus tetapi punya kredensial tersimpan, coba re-connect otomatis
+  if ((!sess || sess.connectionStatus !== 'connected' || !sess.sock) && hasSessionCreds(sessionId)) {
+    logger.info(`[WA:${sessionId}] 🔄 Session disconnected during sendMessage. Attempting auto-reconnect...`);
+    try {
+      await connectSession(sessionId);
+      // Tunggu hingga 8 detik sampai status menjadi connected
+      for (let i = 0; i < 16; i++) {
+        await new Promise(r => setTimeout(r, 500));
+        sess = sessions.get(sessionId);
+        if (sess && sess.connectionStatus === 'connected' && sess.sock) break;
+      }
+    } catch (reconnectErr) {
+      logger.error(`[WA:${sessionId}] Auto-reconnect failed: ${reconnectErr.message}`);
+    }
+  }
+
+  sess = sessions.get(sessionId);
   if (!sess || sess.connectionStatus !== 'connected' || !sess.sock) {
-    throw new Error(`WhatsApp session "${sessionId}" not connected. Please scan QR first.`);
+    throw new Error(`WhatsApp session "${sessionId}" not connected. Status: ${sess?.connectionStatus || 'offline'}. Please check QR / session status.`);
   }
 
   const jid = formatPhone(phone);
@@ -208,6 +226,10 @@ const connectSession = async (sessionId) => {
     browser: [`AM Hub (${sessionId})`, 'Chrome', '126.0'],
     generateHighQualityLinkPreview: true,
     syncFullHistory: false,
+    keepAliveIntervalMs: 15000,     // Ping WhatsApp server setiap 15 detik agar koneksi tidak terputus saat idle
+    connectTimeoutMs: 60000,        // Timeout koneksi awal 60 detik
+    defaultQueryTimeoutMs: 60000,    // Timeout query request 60 detik
+    retryRequestDelayMs: 2000,      // Otomatis coba lagi request jika ada guncangan jaringan (delay 2s)
   });
 
   sess.sock = sock;
