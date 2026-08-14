@@ -33,6 +33,10 @@ const path = require('path');
 app.use(express.static(path.join(__dirname, '../public')));
 
 // ── Public Routes ──────────────────────────────────────────────────────────────
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/dashboard.html'));
+});
+
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', service: 'wa-api-amhub', timestamp: new Date().toISOString() });
 });

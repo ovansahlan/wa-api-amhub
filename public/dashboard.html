@@ -563,7 +563,8 @@
 
               <div class="form-group">
                 <label class="form-label">Delay Antar Pesan (Detik)</label>
-                <input type="number" id="blast-delay" class="form-control" value="3" min="2" max="10">
+                <input type="number" id="blast-delay" class="form-control" value="3" min="1" max="60" oninput="checkBlastDelaySafety(this.value)">
+                <div id="blast-delay-warning" style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">💡 Jeda acak 2–10 detik otomatis diterapkan di backend untuk keamanan nomor.</div>
               </div>
 
               <div class="form-group">
@@ -847,7 +848,7 @@
   </div>
 
   <script>
-    const API_KEY = 'changeme-api-key-amhub-2024';
+    const API_KEY = localStorage.getItem('amhub_api_key') || 'changeme-api-key-amhub';
     let currentMessageLogs = [];
     let currentTemplates = [];
     let currentChatbotRules = [];
@@ -1327,9 +1328,45 @@
       document.getElementById('recipient-count-badge').innerText = `Terdeteksi: ${count} Kontak`;
     }
 
+    function checkBlastDelaySafety(val) {
+      const num = parseInt(val) || 0;
+      const badge = document.getElementById('blast-delay-warning');
+      if (!badge) return;
+      if (num < 2) {
+        badge.innerHTML = '⚠️ <strong style="color: var(--accent-red);">Bahaya Anti-Ban:</strong> Jeda di bawah 2 detik sangat berisiko membuat nomor diblokir WhatsApp!';
+      } else {
+        badge.innerHTML = '💡 Jeda acak 2–10 detik otomatis diterapkan di backend untuk keamanan nomor.';
+      }
+    }
+
     function updateLiveChatPreview(text) {
-      const sampleText = text || 'Halo {{merchant_name}}, ini adalah pratinjau tampilan pesan Anda di WhatsApp!';
-      const rendered = sampleText.replace(/\{\{merchant_name\}\}/g, '<strong>Warung Pak Budi</strong>');
+      const sampleText = text || 'Halo *{{merchant_name}}* 👋\n\nIni adalah pratinjau tampilan pesan Anda di WhatsApp!';
+      
+      const sampleValues = {
+        'merchant_name': 'Kopi Kenangan (Sudirman)',
+        'am_name': 'Muhamad Novan',
+        'visit_date': 'Senin, 17 Agt 2026',
+        'visit_time': '14.00 WIB',
+        'mca_limit': 'Rp 50.000.000',
+        'campaign_name': 'Diskon Hore 17-an',
+        'campaign_details': 'Diskon 50% All Menu min. order 40rb'
+      };
+
+      let rendered = sampleText;
+      for (const [key, val] of Object.entries(sampleValues)) {
+        const regex = new RegExp(`\\{\\{\\s*${key}\\s*\\}\\}`, 'gi');
+        rendered = rendered.replace(regex, `<span style="color: #39c5bb; font-weight: 600;">${val}</span>`);
+      }
+
+      // Fallback untuk variabel custom lainnya
+      rendered = rendered.replace(/\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/g, '<span style="color: #d29922; font-weight: 600;">[$1]</span>');
+
+      // Convert WhatsApp formatting (*bold*, _italic_, \n) to HTML
+      rendered = rendered
+        .replace(/\*(.*?)\*/g, '<strong>$1</strong>')
+        .replace(/_(.*?)_/g, '<em>$1</em>')
+        .replace(/\n/g, '<br>');
+
       document.getElementById('preview-text').innerHTML = rendered;
       document.getElementById('preview-clock').innerText = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     }
