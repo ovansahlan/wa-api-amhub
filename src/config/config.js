@@ -22,6 +22,10 @@ module.exports = {
   // Database
   DB_PATH: process.env.DB_PATH || './data/amhub.db',
 
+  // Supabase (Optional for Cloud Session Persistence)
+  SUPABASE_URL: process.env.SUPABASE_URL || '',
+  SUPABASE_KEY: process.env.SUPABASE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || '',
+
   // AM Hub Integration (optional webhook origin)
   AMHUB_ORIGIN: process.env.AMHUB_ORIGIN || '*',
 };

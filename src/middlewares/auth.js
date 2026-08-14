@@ -7,10 +7,9 @@ const logger = require('../config/logger');
  * Middleware: Validasi API Key dari request header X-API-Key
  */
 const requireApiKey = (req, res, next) => {
-  // Skip auth untuk endpoint publik
+  // Skip auth untuk endpoint publik (misal status/sessions polling dan dashboard UI)
   // NOTE: Middleware dipasang di app.use('/api', ...) jadi req.path sudah di-strip prefix /api
-  // /api/qr → req.path = '/qr'  |  /api/status → req.path = '/status'
-  const publicPaths = ['/qr', '/status', '/sessions', '/logs', '/dashboard'];
+  const publicPaths = ['/qr', '/status', '/sessions', '/dashboard'];
   if (publicPaths.some(p => req.path.startsWith(p))) {
     return next();
   }

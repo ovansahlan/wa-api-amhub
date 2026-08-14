@@ -15,6 +15,12 @@ const fs = require('fs');
 const config = require('../config/config');
 const logger = require('../config/logger');
 const { getDb } = require('../db/database');
+const {
+  isSupabaseEnabled,
+  hasSupabaseCreds,
+  useSupabaseAuthState,
+  clearSupabaseSession,
+} = require('./supabaseAuthService');
 
 // Map penampung multi-session: sessionId -> { sock, qrCode, connectionStatus, reconnectTimer }
 const sessions = new Map();
@@ -152,17 +158,20 @@ const sendMessage = async (phone, message, sessionId = 'bot') => {
 /**
  * Cek apakah session memiliki kredensial login tersimpan yang valid (sudah pernah scan QR & terotentikasi)
  */
-const hasSessionCreds = (sessionId) => {
+const hasSessionCreds = async (sessionId) => {
   const sessionPath = path.resolve(config.WA_SESSION_PATH, sessionId);
   const credsPath = path.join(sessionPath, 'creds.json');
-  if (!fs.existsSync(credsPath)) return false;
-  try {
-    const raw = fs.readFileSync(credsPath, 'utf-8');
-    const data = JSON.parse(raw);
-    return !!(data && data.me && data.me.id);
-  } catch (_) {
-    return false;
+  if (fs.existsSync(credsPath)) {
+    try {
+      const raw = fs.readFileSync(credsPath, 'utf-8');
+      const data = JSON.parse(raw);
+      if (data && data.me && data.me.id) return true;
+    } catch (_) {}
   }
+  if (isSupabaseEnabled()) {
+    return await hasSupabaseCreds(sessionId);
+  }
+  return false;
 };
 
 /**
@@ -197,11 +206,54 @@ const connectSession = async (sessionId) => {
   logger.info(`[WA:${sessionId}] Initializing connection...`);
 
   const sessionPath = path.resolve(config.WA_SESSION_PATH, sessionId);
+  const credsPath = path.join(sessionPath, 'creds.json');
+
+  // Bersihkan folder session jika creds.json corrupt / invalid JSON
+  if (fs.existsSync(credsPath)) {
+    try {
+      const raw = fs.readFileSync(credsPath, 'utf-8');
+      const parsed = JSON.parse(raw);
+      if (!parsed || typeof parsed !== 'object') throw new Error('Invalid JSON structure');
+    } catch (parseErr) {
+      logger.warn(`[WA:${sessionId}] ⚠️ Corrupted creds.json detected (${parseErr.message}). Resetting session folder...`);
+      try {
+        fs.rmSync(sessionPath, { recursive: true, force: true });
+      } catch (_) {}
+    }
+  }
+
   if (!fs.existsSync(sessionPath)) {
     fs.mkdirSync(sessionPath, { recursive: true });
   }
 
-  const { state, saveCreds } = await useMultiFileAuthState(sessionPath);
+  let state, saveCreds;
+  try {
+    if (isSupabaseEnabled()) {
+      const authState = await useSupabaseAuthState(sessionId, sessionPath);
+      state = authState.state;
+      saveCreds = authState.saveCreds;
+    } else {
+      const authState = await useMultiFileAuthState(sessionPath);
+      state = authState.state;
+      saveCreds = authState.saveCreds;
+    }
+  } catch (authErr) {
+    logger.warn(`[WA:${sessionId}] ⚠️ Failed to initialize auth state: ${authErr.message}. Resetting session folder...`);
+    try {
+      fs.rmSync(sessionPath, { recursive: true, force: true });
+      fs.mkdirSync(sessionPath, { recursive: true });
+      const authState = isSupabaseEnabled()
+        ? await useSupabaseAuthState(sessionId, sessionPath)
+        : await useMultiFileAuthState(sessionPath);
+      state = authState.state;
+      saveCreds = authState.saveCreds;
+    } catch (retryErr) {
+      logger.error(`[WA:${sessionId}] ❌ Fatal auth initialization failure: ${retryErr.message}`);
+      sess.connectionStatus = 'disconnected';
+      return sess;
+    }
+  }
+
   const { version } = await fetchLatestBaileysVersion();
 
   const pinoLogger = {
@@ -390,7 +442,7 @@ const connectSession = async (sessionId) => {
  */
 const connectAll = async () => {
   for (const sessionId of DEFAULT_SESSIONS) {
-    if (hasSessionCreds(sessionId)) {
+    if (await hasSessionCreds(sessionId)) {
       logger.info(`[WA:${sessionId}] Existing credentials found. Restoring connection...`);
       await connectSession(sessionId);
     } else {
@@ -419,6 +471,11 @@ const logoutSession = async (sessionId) => {
   try {
     fs.rmSync(sessionPath, { recursive: true, force: true });
   } catch (_) {}
+
+  if (isSupabaseEnabled()) {
+    await clearSupabaseSession(sessionId);
+  }
+
   logger.info(`[WA:${sessionId}] Session logged out and folder cleaned.`);
   return { success: true, session: sessionId };
 };
