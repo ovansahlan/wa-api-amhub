@@ -848,7 +848,12 @@
   </div>
 
   <script>
-    const API_KEY = localStorage.getItem('amhub_api_key') || 'changeme-api-key-amhub';
+    let storedApiKey = localStorage.getItem('amhub_api_key');
+    if (storedApiKey === 'changeme-api-key-amhub-2024') {
+      localStorage.removeItem('amhub_api_key');
+      storedApiKey = null;
+    }
+    const API_KEY = storedApiKey || 'changeme-api-key-amhub';
     let currentMessageLogs = [];
     let currentTemplates = [];
     let currentChatbotRules = [];
