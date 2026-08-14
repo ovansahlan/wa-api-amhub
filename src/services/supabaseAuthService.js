@@ -68,6 +68,10 @@ const useSupabaseAuthState = async (sessionId, sessionPath) => {
       } else if (data && data.length > 0) {
         for (const row of data) {
           const filePath = path.join(sessionPath, `${row.key_id}.json`);
+          const fileDir = path.dirname(filePath);
+          if (!fs.existsSync(fileDir)) {
+            fs.mkdirSync(fileDir, { recursive: true });
+          }
           fs.writeFileSync(filePath, row.data, 'utf-8');
         }
         logger.info(`[SupabaseAuth:${sessionId}] ✅ Downloaded ${data.length} auth key file(s) from Supabase.`);
