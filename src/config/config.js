@@ -8,7 +8,7 @@ module.exports = {
   NODE_ENV: process.env.NODE_ENV || 'development',
 
   // Security
-  API_KEY: process.env.API_KEY || 'changeme-api-key-amhub',
+  API_KEY: process.env.API_KEY || 'changeme-api-key-amhub-2024',
 
   // WhatsApp
   WA_SESSION_PATH: process.env.WA_SESSION_PATH || './auth_info_baileys',

@@ -3,7 +3,7 @@
 // =================================================================
 var WA_CONFIG = {
   WA_API_URL: "https://wa-api-amhub.onrender.com", // URL Render WA API Anda
-  WA_API_KEY: "changeme-api-key-amhub",                      // API Key dari .env
+  WA_API_KEY: "changeme-api-key-amhub-2024",                 // API Key dari .env
 
   SHEET_NAME: "Campaign",
   KONTAK_SHEET_NAME: "Kontak AM", // Nama Sheet tempat daftar kontak (opsional)
